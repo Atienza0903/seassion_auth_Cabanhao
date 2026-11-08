@@ -1,0 +1,26 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/ab.php';
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !csrf_is_valid()) {
+    http_response_code(405);
+    exit('Invalid sign-out request.');
+}
+
+$_SESSION = [];
+
+if (ini_get('session.use_cookies')) {
+    $cookie = session_get_cookie_params();
+    setcookie(session_name(), '', [
+        'expires' => time() - 42000,
+        'path' => $cookie['path'],
+        'domain' => $cookie['domain'],
+        'secure' => $cookie['secure'],
+        'httponly' => $cookie['httponly'],
+        'samesite' => $cookie['samesite'],
+    ]);
+}
+
+session_destroy();
+header('Location: index.php', true, 303);
+exit;
